@@ -21,6 +21,7 @@
 		<repo.name>${repo-name}</repo.name>
 
 		<commons-io.version>2.11.0</commons-io.version>
+		<maven-artifact.version>3.8.4</maven-artifact.version>
 	</properties>
 
 	<dependencies>
@@ -47,6 +48,11 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>${commons-io.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-artifact</artifactId>
+			<version>${maven-artifact.version}</version>
 		</dependency>
 	</dependencies>
 

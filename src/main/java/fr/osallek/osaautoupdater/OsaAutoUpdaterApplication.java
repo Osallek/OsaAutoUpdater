@@ -1,5 +1,6 @@
 package fr.osallek.osaautoupdater;
 
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -85,12 +86,17 @@ public class OsaAutoUpdaterApplication implements ApplicationRunner {
                 }
             }
 
-            GithubRelease release = response.getBody().get(0);
+            GithubRelease release = response.getBody().get(0); //Get the newest
 
-            if (currentJar.exists() && version != null && version.compareTo(release.getTagName()) >= 0) { //Newer version
-                LOGGER.info("No new version found!");
-                runJar();
-                return;
+            if (currentJar.exists() && version != null) {
+                DefaultArtifactVersion currentVersion = new DefaultArtifactVersion(version);
+                DefaultArtifactVersion releaseVersion = new DefaultArtifactVersion(release.getTagName());
+
+                if (currentVersion.compareTo(releaseVersion) >= 0) {
+                    LOGGER.info("No new version found!");
+                    runJar();
+                    return;
+                }
             }
 
             Optional<GithubReleaseAsset> releaseAsset = Optional.empty();
