@@ -1,5 +1,6 @@
 package fr.osallek.osaautoupdater;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,12 +8,10 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedWriter;
@@ -21,7 +20,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,25 +46,22 @@ public class OsaAutoUpdaterApplication implements ApplicationRunner {
 
         File currentJar = new File(this.properties.getJarName() + ".jar");
 
-        String releasesUrl = "https://api.github.com/repos/Osallek/" + this.properties.getRepoName() + "/releases";
+        String releasesUrl = "https://api.github.com/repos/Osallek/" + this.properties.getRepoName() + "/releases/latest";
 
         try {
-            ResponseEntity<List<GithubRelease>> response = new RestTemplate().exchange(releasesUrl, HttpMethod.GET, null,
-                                                                                       new ParameterizedTypeReference<>() {});
+            ResponseEntity<GithubRelease> response = new RestTemplate().getForEntity(releasesUrl, GithubRelease.class);
 
             if (!HttpStatus.OK.equals(response.getStatusCode())) {
-                LOGGER.error("An error occurred while getting releases from Github: {}", response.getStatusCode());
+                LOGGER.error("An error occurred while getting release from Github: {}", response.getStatusCode());
                 runJar();
                 return;
             }
 
-            if (CollectionUtils.isEmpty(response.getBody())) {
-                LOGGER.warn("No release found for {}", this.properties.getJarName());
+            if (response.getBody() == null) {
+                LOGGER.error("No body returned from Github!");
                 runJar();
                 return;
             }
-
-            response.getBody().sort(Comparator.comparing(GithubRelease::getTagName).reversed());
 
             File versionFile = new File(VERSION_FILE);
 
@@ -86,7 +81,7 @@ public class OsaAutoUpdaterApplication implements ApplicationRunner {
                 }
             }
 
-            GithubRelease release = response.getBody().get(0); //Get the newest
+            GithubRelease release = response.getBody();
 
             if (currentJar.exists() && version != null) {
                 DefaultArtifactVersion currentVersion = new DefaultArtifactVersion(version);
@@ -122,7 +117,7 @@ public class OsaAutoUpdaterApplication implements ApplicationRunner {
                 File file = new File(finalReleaseAsset.get().getName());
 
                 try (FileOutputStream outputStream = new FileOutputStream(file)) {
-                    StreamUtils.copy(clientHttpResponse.getBody(), outputStream);
+                    IOUtils.copyLarge(clientHttpResponse.getBody(), outputStream, new byte[500_000]);
                 }
 
                 LOGGER.info("Downloaded: {}!", finalReleaseAsset.get().getName());
