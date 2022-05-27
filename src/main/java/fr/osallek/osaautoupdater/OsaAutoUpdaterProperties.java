@@ -7,16 +7,16 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "updater")
 public class OsaAutoUpdaterProperties {
 
-    private String jarName;
+    private String executableName;
 
     private String repoName;
 
-    public String getJarName() {
-        return jarName;
+    public String getExecutableName() {
+        return executableName;
     }
 
-    public void setJarName(String jarName) {
-        this.jarName = jarName;
+    public void setExecutableName(String executableName) {
+        this.executableName = executableName;
     }
 
     public String getRepoName() {

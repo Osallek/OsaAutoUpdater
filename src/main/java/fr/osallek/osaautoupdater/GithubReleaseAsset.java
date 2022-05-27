@@ -2,27 +2,15 @@ package fr.osallek.osaautoupdater;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class GithubReleaseAsset {
+public record GithubReleaseAsset(@JsonProperty("name") String name, @JsonProperty("browser_download_url") String url) {
 
-    @JsonProperty("name")
-    private String name;
-
-    @JsonProperty("browser_download_url")
-    private String url;
-
-    public String getName() {
+    @Override
+    public String name() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUrl() {
+    @Override
+    public String url() {
         return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 }

@@ -1,30 +1,17 @@
 package fr.osallek.osaautoupdater;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
-public class GithubRelease {
+public record GithubRelease(@JsonProperty("tag_name") String tagName, @JsonProperty("assets") List<GithubReleaseAsset> assets) {
 
-    @JsonProperty("tag_name")
-    private String tagName;
-
-    @JsonProperty("assets")
-    private List<GithubReleaseAsset> assets;
-
-    public String getTagName() {
+    @Override
+    public String tagName() {
         return tagName;
     }
 
-    public void setTagName(String tagName) {
-        this.tagName = tagName;
-    }
-
-    public List<GithubReleaseAsset> getAssets() {
+    @Override
+    public List<GithubReleaseAsset> assets() {
         return assets;
-    }
-
-    public void setAssets(List<GithubReleaseAsset> assets) {
-        this.assets = assets;
     }
 }

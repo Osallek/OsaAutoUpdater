@@ -1,5 +1,13 @@
 package fr.osallek.osaautoupdater;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
+import java.util.Optional;
 import org.apache.commons.io.IOUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.slf4j.Logger;
@@ -13,15 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.List;
-import java.util.Optional;
 
 @SpringBootApplication
 public class OsaAutoUpdaterApplication implements ApplicationRunner {
@@ -42,9 +41,9 @@ public class OsaAutoUpdaterApplication implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        LOGGER.info("Checking {} for updates!", this.properties.getJarName());
+        LOGGER.info("Checking {} for updates!", this.properties.getExecutableName());
 
-        File currentJar = new File(this.properties.getJarName() + ".jar");
+        File currentExecutable = new File(this.properties.getExecutableName());
 
         String releasesUrl = "https://api.github.com/repos/Osallek/" + this.properties.getRepoName() + "/releases/latest";
 
@@ -53,21 +52,21 @@ public class OsaAutoUpdaterApplication implements ApplicationRunner {
 
             if (!HttpStatus.OK.equals(response.getStatusCode())) {
                 LOGGER.error("An error occurred while getting release from Github: {}", response.getStatusCode());
-                runJar();
+                runExecutable();
                 return;
             }
 
             if (response.getBody() == null) {
                 LOGGER.error("No body returned from Github!");
-                runJar();
+                runExecutable();
                 return;
             }
 
             File versionFile = new File(VERSION_FILE);
 
-            if (currentJar.exists() && versionFile.exists() && (!versionFile.canRead() || !versionFile.canWrite())) {
+            if (currentExecutable.exists() && versionFile.exists() && (!versionFile.canRead() || !versionFile.canWrite())) {
                 LOGGER.warn("{} file exists but cannot be read! Ignoring update!", versionFile);
-                runJar();
+                runExecutable();
                 return;
             }
 
@@ -83,99 +82,99 @@ public class OsaAutoUpdaterApplication implements ApplicationRunner {
 
             GithubRelease release = response.getBody();
 
-            if (currentJar.exists() && version != null) {
+            if (currentExecutable.exists() && version != null) {
                 DefaultArtifactVersion currentVersion = new DefaultArtifactVersion(version);
-                DefaultArtifactVersion releaseVersion = new DefaultArtifactVersion(release.getTagName());
+                DefaultArtifactVersion releaseVersion = new DefaultArtifactVersion(release.tagName());
 
                 if (currentVersion.compareTo(releaseVersion) >= 0) {
                     LOGGER.info("No new version found!");
-                    runJar();
+                    runExecutable();
                     return;
                 }
             }
 
             Optional<GithubReleaseAsset> releaseAsset = Optional.empty();
 
-            if (!CollectionUtils.isEmpty(release.getAssets())) {
-                releaseAsset = release.getAssets()
+            if (!CollectionUtils.isEmpty(release.assets())) {
+                releaseAsset = release.assets()
                                       .stream()
-                                      .filter(asset -> asset.getName().matches(this.properties.getJarName() + ".*.jar"))
+                                      .filter(asset -> this.properties.getExecutableName().equalsIgnoreCase(asset.name()))
                                       .findFirst();
             }
 
             if (releaseAsset.isEmpty()) {
                 LOGGER.info("Not asset");
                 //No valid asset
-                runJar();
+                runExecutable();
                 return;
             }
 
             //Download
             Optional<GithubReleaseAsset> finalReleaseAsset = releaseAsset;
-            File newJar = new RestTemplate().execute(releaseAsset.get().getUrl(), HttpMethod.GET, null, clientHttpResponse -> {
-                LOGGER.info("Downloading: {}!", finalReleaseAsset.get().getName());
-                File file = new File(finalReleaseAsset.get().getName());
+            File newExecutable = new RestTemplate().execute(releaseAsset.get().url(), HttpMethod.GET, null, clientHttpResponse -> {
+                LOGGER.info("Downloading: {}!", finalReleaseAsset.get().name());
+                File file = new File("tmp_" + finalReleaseAsset.get().name());
 
                 try (FileOutputStream outputStream = new FileOutputStream(file)) {
-                    IOUtils.copyLarge(clientHttpResponse.getBody(), outputStream, new byte[500_000]);
+                    IOUtils.copyLarge(clientHttpResponse.getBody(), outputStream, new byte[1_000_000]);
                 }
 
-                LOGGER.info("Downloaded: {}!", finalReleaseAsset.get().getName());
+                LOGGER.info("Downloaded: {}!", finalReleaseAsset.get().name());
                 return file;
             });
 
-            if (newJar == null) {
-                LOGGER.error("Could not download {}!", releaseAsset.get().getName());
-                runJar();
+            if (newExecutable == null) {
+                LOGGER.error("Could not download {}!", releaseAsset.get().name());
+                runExecutable();
                 return;
             }
 
             try {
-                Files.deleteIfExists(currentJar.toPath());
+                Files.deleteIfExists(currentExecutable.toPath());
             } catch (IOException e) {
-                LOGGER.error("Could not delete {} because: {}", currentJar, e.getMessage());
-                runJar();
+                LOGGER.error("Could not delete {} because: {}", currentExecutable, e.getMessage());
+                runExecutable();
                 return;
             }
 
-            if (!newJar.renameTo(currentJar)) {
-                LOGGER.error("Could not rename {} to {}", newJar, currentJar);
-                runJar();
+            if (!newExecutable.renameTo(currentExecutable)) {
+                LOGGER.error("Could not rename {} to {}", newExecutable, currentExecutable);
+                runExecutable();
                 return;
             }
 
-            String newVersion = releaseAsset.get().getName().replace(this.properties.getJarName(), "").replace(".jar", "").substring(1);
+            String newVersion = release.tagName();
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(versionFile))) {
                 writer.write(newVersion);
             } catch (IOException e) {
                 LOGGER.error("Could not write version to {} because: {}", versionFile, e.getMessage());
-                runJar();
+                runExecutable();
                 return;
             }
 
             LOGGER.info("Downloaded new version {}!", newVersion);
 
-            runJar();
+            runExecutable();
         } catch (Exception e) {
-            runJar();
+            runExecutable();
         }
     }
 
-    private void runJar() throws IOException {
-        File jarFile = new File(this.properties.getJarName() + ".jar");
+    private void runExecutable() throws IOException {
+        File executableFile = new File(this.properties.getExecutableName());
 
-        if (!jarFile.exists() || !jarFile.canExecute()) {
-            LOGGER.error("{} does not exists or is not executable!", this.properties.getJarName());
+        if (!executableFile.exists() || !executableFile.canExecute()) {
+            LOGGER.error("{} does not exists or is not executable!", this.properties.getExecutableName());
             return;
         }
 
-        Process process = new ProcessBuilder("java", "-jar", this.properties.getJarName() + ".jar").start();
+        Process process = new ProcessBuilder(this.properties.getExecutableName()).start();
 
         if (!process.isAlive()) {
-            LOGGER.error("{} does not seems to have started!", this.properties.getJarName());
+            LOGGER.error("{} does not seems to have started!", this.properties.getExecutableName());
         } else {
-            LOGGER.info("{} started!", this.properties.getJarName());
+            LOGGER.info("{} started!", this.properties.getExecutableName());
         }
 
         LOGGER.info("Closing Auto updater!");

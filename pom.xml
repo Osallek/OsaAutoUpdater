@@ -5,23 +5,24 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.6.0</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<version>2.7.0</version>
+		<relativePath/>
 	</parent>
+
 	<groupId>fr.osallek</groupId>
 	<artifactId>osa-auto-updater</artifactId>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
 	<name>Osa Auto Updater</name>
 	<description>Auto updater</description>
 
 	<properties>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
 
-		<jar.name>${jar-name}</jar.name>
-		<repo.name>${repo-name}</repo.name>
+		<executable.name>${EXECUTABLE_NAME}</executable.name>
+		<repo.name>${REPO_NAME}</repo.name>
 
 		<commons-io.version>2.11.0</commons-io.version>
-		<maven-artifact.version>3.8.4</maven-artifact.version>
+		<maven-artifact.version>3.8.5</maven-artifact.version>
 	</properties>
 
 	<dependencies>
@@ -57,7 +58,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>${updater-jar.name}</finalName>
+		<finalName>${UPDATER_NAME}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
