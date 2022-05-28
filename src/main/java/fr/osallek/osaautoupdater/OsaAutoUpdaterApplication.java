@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
-import org.apache.commons.io.IOUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +115,11 @@ public class OsaAutoUpdaterApplication implements ApplicationRunner {
                 File file = new File("tmp_" + finalReleaseAsset.get().name());
 
                 try (FileOutputStream outputStream = new FileOutputStream(file)) {
-                    IOUtils.copyLarge(clientHttpResponse.getBody(), outputStream, new byte[1_000_000]);
+                    byte[] buffer = new byte[1_000_000];
+                    int length;
+                    while ((length = clientHttpResponse.getBody().read(buffer)) > 0) {
+                        outputStream.write(buffer, 0, length);
+                    }
                 }
 
                 LOGGER.info("Downloaded: {}!", finalReleaseAsset.get().name());
