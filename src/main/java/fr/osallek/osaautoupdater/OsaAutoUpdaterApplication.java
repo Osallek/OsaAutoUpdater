@@ -40,7 +40,7 @@ public class OsaAutoUpdaterApplication implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        LOGGER.info("Checking {} for updates!", this.properties.getExecutableName());
+        LOGGER.info("Checking {} for updates!", this.properties.getRepoName());
 
         File currentExecutable = new File(this.properties.getExecutableName());
 
@@ -172,7 +172,13 @@ public class OsaAutoUpdaterApplication implements ApplicationRunner {
             return;
         }
 
-        Process process = new ProcessBuilder(this.properties.getExecutableName()).start();
+        Process process;
+
+        if (this.properties.getExecutableName().endsWith(".jar")) {
+            process = new ProcessBuilder(this.properties.getExecutableName()).start();
+        } else {
+            process = new ProcessBuilder("java", "-jar", this.properties.getExecutableName()).start();
+        }
 
         if (!process.isAlive()) {
             LOGGER.error("{} does not seems to have started!", this.properties.getExecutableName());
