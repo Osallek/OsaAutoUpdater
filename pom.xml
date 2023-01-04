@@ -61,28 +61,49 @@
     <finalName>${UPDATER_NAME}</finalName>
     <plugins>
       <plugin>
-        <groupId>org.graalvm.buildtools</groupId>
-        <artifactId>native-maven-plugin</artifactId>
-        <extensions>true</extensions>
-        <executions>
-          <execution>
-            <id>build-native</id>
-            <goals>
-              <goal>build</goal>
-            </goals>
-            <phase>package</phase>
-          </execution>
-        </executions>
-        <configuration>
-          <imageName>${UPDATER_NAME}</imageName>
-          <mainClass>fr.osallek.osaautoupdater.OsaAutoUpdaterApplication</mainClass>
-          <skipNativeTests>true</skipNativeTests>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>native</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+            <extensions>true</extensions>
+            <executions>
+              <execution>
+                <id>build-native</id>
+                <goals>
+                  <goal>compile-no-fork</goal>
+                </goals>
+                <phase>package</phase>
+              </execution>
+            </executions>
+            <configuration>
+              <imageName>${UPDATER_NAME}</imageName>
+              <skipNativeTests>true</skipNativeTests>
+              <buildArgs>
+                <arg>/I</arg>
+                <arg>target/OsaSaveExtractorUpdater.exe</arg>
+                <arg>favicon.ico</arg>
+              </buildArgs>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+              <classifier>exec</classifier>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

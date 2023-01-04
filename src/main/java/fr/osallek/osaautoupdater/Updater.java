@@ -156,6 +156,8 @@ public class Updater implements ApplicationListener<ApplicationReadyEvent> {
 
             runExecutable();
         } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+
             try {
                 runExecutable();
             } catch (IOException ex) {
