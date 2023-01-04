@@ -175,9 +175,9 @@ public class OsaAutoUpdaterApplication implements ApplicationRunner {
         Process process;
 
         if (this.properties.getExecutableName().endsWith(".jar")) {
-            process = new ProcessBuilder(this.properties.getExecutableName()).start();
-        } else {
             process = new ProcessBuilder("java", "-jar", this.properties.getExecutableName()).start();
+        } else {
+            process = new ProcessBuilder(this.properties.getExecutableName()).start();
         }
 
         if (!process.isAlive()) {
