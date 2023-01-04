@@ -3,4 +3,4 @@
 Small project to allow auto update of our other projects using Github Releases.
 
 ## To build
-mvn clean package -DskipTests -DUPDATER_NAME=OsaModEditorAutoUpdater -DREPO_NAME=OsaModEditor -DEXECUTABLE_NAME=OsaModEditor-0.0.6.jar -P native
+mvn clean package -DEXECUTABLE_NAME=OsaSaveExtractor.jar -DREPO_NAME=OsaSaveExtractor -DUPDATER_NAME=OsaSaveExtractorUpdater -DskipTests -DskipNativeTests
