@@ -3,8 +3,8 @@ package fr.osallek.osaautoupdater;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class Updater implements ApplicationRunner {
+public class Updater implements ApplicationListener<ApplicationReadyEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Updater.class);
 
@@ -35,7 +35,7 @@ public class Updater implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void onApplicationEvent(ApplicationReadyEvent event) {
         LOGGER.info("Checking {} for updates!", this.properties.getRepoName());
 
         File currentExecutable = new File(this.properties.getExecutableName());
@@ -156,7 +156,11 @@ public class Updater implements ApplicationRunner {
 
             runExecutable();
         } catch (Exception e) {
-            runExecutable();
+            try {
+                runExecutable();
+            } catch (IOException ex) {
+                LOGGER.error(e.getMessage(), e);
+            }
         }
     }
 

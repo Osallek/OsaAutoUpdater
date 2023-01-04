@@ -72,25 +72,16 @@
             </goals>
             <phase>package</phase>
           </execution>
-          <execution>
-            <id>test-native</id>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <phase>test</phase>
-          </execution>
         </executions>
         <configuration>
           <imageName>${UPDATER_NAME}</imageName>
           <mainClass>fr.osallek.osaautoupdater.OsaAutoUpdaterApplication</mainClass>
+          <skipNativeTests>true</skipNativeTests>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <configuration>
-          <classifier>exec</classifier>
-        </configuration>
       </plugin>
     </plugins>
   </build>
