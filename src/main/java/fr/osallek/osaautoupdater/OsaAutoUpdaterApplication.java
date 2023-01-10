@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class OsaAutoUpdaterApplication {
 
     public static void main(String[] args) {
+        System.setProperty("OSALLEK_DOCUMENTS", UpdateUtils.getDocumentsPath().toString());
         SpringApplication.run(OsaAutoUpdaterApplication.class, args);
     }
 }

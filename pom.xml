@@ -88,11 +88,6 @@
             <configuration>
               <imageName>${UPDATER_NAME}</imageName>
               <skipNativeTests>true</skipNativeTests>
-              <buildArgs>
-                <arg>/I</arg>
-                <arg>target/OsaSaveExtractorUpdater.exe</arg>
-                <arg>favicon.ico</arg>
-              </buildArgs>
             </configuration>
           </plugin>
           <plugin>
