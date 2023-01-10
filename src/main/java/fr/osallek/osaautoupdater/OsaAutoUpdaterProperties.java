@@ -11,6 +11,8 @@ public class OsaAutoUpdaterProperties {
 
     private String repoName;
 
+    private String javaVersion;
+
     public String getExecutableName() {
         return executableName;
     }
@@ -25,5 +27,13 @@ public class OsaAutoUpdaterProperties {
 
     public void setRepoName(String repoName) {
         this.repoName = repoName;
+    }
+
+    public String getJavaVersion() {
+        return javaVersion;
+    }
+
+    public void setJavaVersion(String javaVersion) {
+        this.javaVersion = javaVersion;
     }
 }
