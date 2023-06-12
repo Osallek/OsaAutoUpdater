@@ -21,6 +21,7 @@
     <executable.name>${EXECUTABLE_NAME}</executable.name>
     <repo.name>${REPO_NAME}</repo.name>
     <updater.name>${UPDATER_NAME}</updater.name>
+    <min_java_version.name>${MIN_JAVA_VERSION}</min_java_version.name>
 
     <maven-artifact.version>3.8.7</maven-artifact.version>
   </properties>
