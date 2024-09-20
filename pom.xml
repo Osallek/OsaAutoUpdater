@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.0.1</version>
+    <version>3.3.3</version>
     <relativePath/>
   </parent>
 
@@ -16,14 +16,15 @@
   <description>Auto updater</description>
 
   <properties>
-    <java.version>17</java.version>
+    <java.version>21</java.version>
 
     <executable.name>${EXECUTABLE_NAME}</executable.name>
     <repo.name>${REPO_NAME}</repo.name>
     <updater.name>${UPDATER_NAME}</updater.name>
     <min_java_version.name>${MIN_JAVA_VERSION}</min_java_version.name>
 
-    <maven-artifact.version>3.8.7</maven-artifact.version>
+    <maven-artifact.version>3.9.9</maven-artifact.version>
+    <commons-lang3.version>3.17.0</commons-lang3.version>
   </properties>
 
   <dependencies>
@@ -50,6 +51,13 @@
       <artifactId>spring-boot-configuration-processor</artifactId>
       <optional>true</optional>
     </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons-lang3.version}</version>
+    </dependency>
+
 
     <dependency>
       <groupId>org.apache.maven</groupId>

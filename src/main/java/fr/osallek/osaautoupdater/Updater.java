@@ -36,7 +36,7 @@ public class Updater implements ApplicationListener<ApplicationReadyEvent> {
 
     private static final Pattern JAVA_VERSION_PATTERN = Pattern.compile("\"(.*?)\"");
 
-    private static final String JAVA_DOWNLOAD_URL = "https://download.oracle.com/java/17/archive/jdk-17.0.5_windows-x64_bin.zip";
+    private static final String JAVA_DOWNLOAD_URL = "https://download.oracle.com/java/21/archive/jdk-21.0.3_windows-x64_bin.zip";
 
     private final OsaAutoUpdaterProperties properties;
 
@@ -50,12 +50,12 @@ public class Updater implements ApplicationListener<ApplicationReadyEvent> {
     public void onApplicationEvent(ApplicationReadyEvent event) {
         try {
             if (this.properties.getJavaVersion() != null) {
-                LOGGER.info("Checking for Java {}!", this.properties.getJavaVersion());
+                LOGGER.info("Checking for Java {}", this.properties.getJavaVersion());
 
                 boolean hasGlobalJava = checkJavaVersion(null);
 
                 if (!hasGlobalJava) {
-                    LOGGER.warn("Could not get right Java version from global!");
+                    LOGGER.warn("Could not get right Java version from global");
                     Path osallekDocumentsFolder = UpdateUtils.getDocumentsPath();
                     this.javaFolder = Optional.of(osallekDocumentsFolder.resolve("java"));
 
@@ -64,25 +64,25 @@ public class Updater implements ApplicationListener<ApplicationReadyEvent> {
 
                         Path javaZip = new RestTemplate().execute(JAVA_DOWNLOAD_URL, HttpMethod.GET, null, clientHttpResponse -> {
                             Path path = osallekDocumentsFolder.resolve("java_tmp.zip");
-                            LOGGER.info("Downloading Java to {}!", path);
+                            LOGGER.info("Downloading Java to {}", path);
                             UpdateUtils.copyToFile(clientHttpResponse.getBody(), path.toFile());
 
-                            LOGGER.info("Downloaded Java!");
+                            LOGGER.info("Downloaded Java");
                             return path;
                         });
 
                         UpdateUtils.unzip(javaZip, osallekDocumentsFolder);
-                        Files.move(osallekDocumentsFolder.resolve("jdk-17.0.5"), this.javaFolder.get(), StandardCopyOption.REPLACE_EXISTING,
+                        Files.move(osallekDocumentsFolder.resolve("jdk-21.0.3"), this.javaFolder.get(), StandardCopyOption.REPLACE_EXISTING,
                                    StandardCopyOption.ATOMIC_MOVE);
                         Files.deleteIfExists(javaZip);
                     }
                 }
             } else {
-                LOGGER.error("Could not check Java version!");
+                LOGGER.error("Could not check Java version");
                 return;
             }
 
-            LOGGER.info("Checking {} for updates!", this.properties.getRepoName());
+            LOGGER.info("Checking {} for updates", this.properties.getRepoName());
 
             File currentExecutable = new File(this.properties.getExecutableName());
 
@@ -97,7 +97,7 @@ public class Updater implements ApplicationListener<ApplicationReadyEvent> {
             }
 
             if (response.getBody() == null) {
-                LOGGER.error("No body returned from Github!");
+                LOGGER.error("No body returned from Github");
                 runExecutable();
                 return;
             }
@@ -105,7 +105,7 @@ public class Updater implements ApplicationListener<ApplicationReadyEvent> {
             File versionFile = new File(VERSION_FILE);
 
             if (currentExecutable.exists() && versionFile.exists() && (!versionFile.canRead() || !versionFile.canWrite())) {
-                LOGGER.warn("{} file exists but cannot be read! Ignoring update!", versionFile);
+                LOGGER.warn("{} file exists but cannot be read! Ignoring update", versionFile);
                 runExecutable();
                 return;
             }
@@ -127,7 +127,7 @@ public class Updater implements ApplicationListener<ApplicationReadyEvent> {
                 ComparableVersion releaseVersion = new ComparableVersion(release.tagName());
 
                 if (currentVersion.compareTo(releaseVersion) >= 0) {
-                    LOGGER.info("No new version found!");
+                    LOGGER.info("No new version found");
                     runExecutable();
                     return;
                 }
@@ -152,16 +152,16 @@ public class Updater implements ApplicationListener<ApplicationReadyEvent> {
             //Download
             Optional<GithubReleaseAsset> finalReleaseAsset = releaseAsset;
             File newExecutable = new RestTemplate().execute(releaseAsset.get().url(), HttpMethod.GET, null, clientHttpResponse -> {
-                LOGGER.info("Downloading: {}!", finalReleaseAsset.get().name());
+                LOGGER.info("Downloading: {}", finalReleaseAsset.get().name());
                 File file = new File("tmp_" + finalReleaseAsset.get().name());
                 UpdateUtils.copyToFile(clientHttpResponse.getBody(), file);
 
-                LOGGER.info("Downloaded: {}!", finalReleaseAsset.get().name());
+                LOGGER.info("Downloaded: {}", finalReleaseAsset.get().name());
                 return file;
             });
 
             if (newExecutable == null) {
-                LOGGER.error("Could not download {}!", releaseAsset.get().name());
+                LOGGER.error("Could not download {}", releaseAsset.get().name());
                 runExecutable();
                 return;
             }
@@ -190,7 +190,7 @@ public class Updater implements ApplicationListener<ApplicationReadyEvent> {
                 return;
             }
 
-            LOGGER.info("Downloaded new version {}!", newVersion);
+            LOGGER.info("Downloaded new version {}", newVersion);
 
             runExecutable();
         } catch (Exception e) {
@@ -208,7 +208,7 @@ public class Updater implements ApplicationListener<ApplicationReadyEvent> {
         File executableFile = new File(this.properties.getExecutableName());
 
         if (!executableFile.exists() || !executableFile.canExecute()) {
-            LOGGER.error("{} does not exists or is not executable!", this.properties.getExecutableName());
+            LOGGER.error("{} does not exists or is not executable", this.properties.getExecutableName());
             return;
         }
 
@@ -228,12 +228,12 @@ public class Updater implements ApplicationListener<ApplicationReadyEvent> {
         }
 
         if (!process.isAlive()) {
-            LOGGER.error("{} does not seems to have started!", this.properties.getExecutableName());
+            LOGGER.error("{} does not seems to have started", this.properties.getExecutableName());
         } else {
-            LOGGER.info("{} started!", this.properties.getExecutableName());
+            LOGGER.info("{} started", this.properties.getExecutableName());
         }
 
-        LOGGER.info("Closing Auto updater!");
+        LOGGER.info("Closing Auto updater");
     }
 
     private boolean checkJavaVersion(Path path) throws InterruptedException {
@@ -249,7 +249,7 @@ public class Updater implements ApplicationListener<ApplicationReadyEvent> {
                     "-version").start();
 
             if (!process.isAlive()) {
-                LOGGER.error("Could not check Java version!");
+                LOGGER.error("Could not check Java version");
                 return false;
             } else {
                 process.waitFor();
@@ -266,9 +266,9 @@ public class Updater implements ApplicationListener<ApplicationReadyEvent> {
                         ComparableVersion neededVersion = new ComparableVersion(this.properties.getJavaVersion());
 
                         if (foundVersion.compareTo(neededVersion) < 0) {
-                            LOGGER.error("Found Java version {}, need at least {}", version, this.properties.getJavaVersion());
+                            LOGGER.error("Found Java version {} in {}, need at least {}", version, Optional.ofNullable(path).map(Path::toString).orElse("Global"), this.properties.getJavaVersion());
                         } else {
-                            LOGGER.info("Found Java version: {}", version);
+                            LOGGER.info("Found Java version: {} in {}", version, Optional.ofNullable(path).map(Path::toString).orElse("Global"));
                             return true;
                         }
                     }
@@ -277,7 +277,7 @@ public class Updater implements ApplicationListener<ApplicationReadyEvent> {
 
             return false;
         } catch (IOException e) {
-            LOGGER.error("Could not check Java version!");
+            LOGGER.error("Could not check Java version");
             return false;
         }
     }

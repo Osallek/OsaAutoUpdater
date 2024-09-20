@@ -32,3 +32,7 @@ build/
 
 ### VS Code ###
 .vscode/
+BUILD.md
+version.txt
+
+OsaSaveExtractor.jar
